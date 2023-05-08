@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prayer Time and Clock</title>
+    <style>
+        #clock {
+            font-size: 175px;
+            width: 900px;
+            margin: 200px;
+            text-align: center;
+            color: black;
+        }
+        #date {
+            font-size: 24px;
+            text-align: center;
+            color: black;
+        }
+        #prayerTimes {
+            font-size: 24px;
+            text-align: center;
+            color: black;
+        }
+        #countdown {
+            font-size: 24px;
+            text-align: center;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="clock"></div>
+    <div id="date"></div>
+    <div id="prayerTimes">
+        <h1>Today's Prayer Time</h1>
+        <table>
+            <tr>
+                <td>Fajr:</td>
+                <td id="fajr"></td>
+            </tr>
+            <tr>
+                <td>Dhuhr:</td>
+                <td id="dhuhr"></td>
+            </tr>
+            <tr>
+                <td>Asr:</td>
+                <td id="asr"></td>
+            </tr>
+            <tr>
+                <td>Maghrib:</td>
+                <td id="maghrib"></td>
+            </tr>
+            <tr>
+                <td>Isha:</td>
+                <td id="isha"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="countdown">
+        <h1>Time Remaining Until Next Prayer</h1>
+        <p id="countdownTime"></p>
+    </div>
+    <script>
+        setInterval(showTime, 1000);
+        function showTime() {
+            let time = new Date();
+            let hour = time.getHours();
+            let min = time.getMinutes();
+            let sec = time.getSeconds();
+            am_pm = "AM";
+
+            if (hour > 12) {
+                hour -= 12;
+                am_pm = "PM";
+            }
+            if (hour == 0) {
+                hr = 12;
+                am_pm = "AM";
+            }
+
+            hour = hour < 10 ? "0" + hour : hour;
+            min = min < 10 ? "0" + min : min;
+            sec = sec < 10 ? "0" + sec : sec;
+
+            let currentTime = hour + ":" + min + ":" + sec + am_pm;
+
+            document.getElementById("clock").innerHTML = currentTime;
+            document.getElementById("date").innerHTML = time.toDateString();
+        }
+
+        showTime();
+
+        fetch("http://muslimsalat.com/%C3%A5m%C3%A5l.json")
+            .then(response => response.json())
+            .then(data => {
+                const fajrTime = data.items[0].fajr;
+                const dhuhrTime = data.items[0].dhuhr;
+                const asrTime = data.items[0].asr;
+                const maghribTime = data.items[0].maghrib;
+                const ishaTime = data.items[0].isha;
+
+                document.getElementById("fajr").textContent = fajrTime;
+                document.getElementById("dhuhr").textContent = dhuhrTime;
+                document.getElementById("asr").textContent = asrTime;
+                document.getElementById("maghrib").textContent = maghribTime;
+                document.getElementById("isha").textContent = ishaTime;
+
+                setInterval(() => updateCountdown([fajrTime, dhuhrTime, asrTime, maghribTime, ishaTime]), 1000);
+            })
+            .catch(error => console.error(error));
+
+        function updateCountdown(prayerTimes) {
+            const now = new Date();
+            const today = now.toDateString();
+            const remainingPrayerTimes = prayerTimes.map(time => new Date(today + " " + time)).filter(time => time > now);
+
+            if (remainingPrayerTimes.length > 0) {
+                const nextPrayerTime = remainingPrayerTimes[0];
+                const timeDifference = nextPrayerTime - now;
+                const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+                document.getElementById("countdownTime").innerHTML = `${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                document.getElementById("countdownTime").innerHTML = "All prayers for today have passed.";
+            }
+        }
+    </script>
+</body>
+</html>

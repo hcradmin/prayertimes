@@ -11,12 +11,11 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-         }
-
+        }
         #clock {
             font-size: 175px;
             width: 900px;
-            margin: 200px;
+            margin: 20px;
             text-align: center;
             color: black;
         }
@@ -99,7 +98,7 @@
 
         showTime();
 
-        fetch("http://muslimsalat.com/%C3%A5m%C3%A5l.json")
+        fetch("REPLACE_WITH_VALID_API_URL")
             .then(response => response.json())
             .then(data => {
                 const fajrTime = data.items[0].fajr;
